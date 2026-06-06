@@ -159,9 +159,15 @@ The grounding contract lives in the system prompt at the Prompt assembly step: t
      "I'll use AI to help me code" is not a plan.
      "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
      with my specified chunk size and overlap" is a plan. -->
-
   
 **Milestone 3 — Ingestion and chunking:**
+- Task 1: Document Ingestion and Cleaning
+  - Input: I will provide the AI (Claude Code) with my Documents list, a sample of my manually copied .txt files from Reddit and Yelp, and specific instructions to remove noisy boilerplate like HTML tags, usernames, and navigation text.
+  - Expected Output: A Python script that successfully loads my raw text files from disk and cleans them, leaving only the substantive review text and context.
+  
+- Task 2: Implementing the Chunking Strategy
+  - Input: I will provide the AI with the cleaned text and the exact Chunking Strategy section from this spec (recursive character splitter, ~200 token size, ~40 token overlap).
+  - Expected Output: Python code utilizing LangChain's text splitter to break the documents down according to my exact parameters, plus a function to print out 5 representative chunks so I can manually inspect their quality before moving on.  
 
 **Milestone 4 — Embedding and retrieval:**
 
