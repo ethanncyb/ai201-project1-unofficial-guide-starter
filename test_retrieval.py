@@ -1,5 +1,5 @@
-"""Milestone 4 checkpoint: run the 5 evaluation queries from planning.md through the 
-ChromaDB retriever and print the top-k chunks with distance scores + a verdict per query.
+"""Run the 5 evaluation queries from planning.md through the ChromaDB retriever 
+and print the top-k chunks with distance scores + a verdict per query.
 
 Distance verdicts follow the thresholds:
   best distance < 0.5     → [good]

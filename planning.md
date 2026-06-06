@@ -179,3 +179,12 @@ The grounding contract lives in the system prompt at the Prompt assembly step: t
   - Expected Output: A standalone `test_retrieval.py` that runs each query through `retrieve()`, prints the top-k hits with distance + source + parent_title + preview, and a verdict per query.
 
 **Milestone 5 — Generation and interface:**
+- Task 1: Grounded Generation Script
+  - Input: I will provide the AI with my Retrieval Approach (top-k = 5 against the existing `retrieve()` helper in `embed.py`), the strict grounding contract from the Architecture section (answer only from retrieved chunks, cite source filenames, refuse with "I don't have enough information on that" when context is insufficient), and the Groq model choice (`llama-3.3-70b-versatile` via the `groq` SDK with `GROQ_API_KEY` loaded from `.env`).
+  - Expected Output: A `generate.py` module exposing `answer(query, k)` that calls `retrieve()`, formats each chunk with its source filename and parent_title in the prompt, calls Groq at a low temperature, and returns the answer alongside the deduplicated source filenames. The unique source list is computed programmatically from chunk metadata so attribution does not depend on the LLM remembering to cite. The script also runs as a CLI (`python generate.py -q "..."`) for quick spot checks.
+  - Verification: Run the 5 evaluation questions from this spec through the CLI and confirm each answer is grounded in the cited chunks; run one out-of-scope question (e.g. a question about Mars weather) and confirm the system returns the exact refusal sentence.
+
+- Task 2: Gradio Web Interface
+  - Input: The `answer()` function from Task 1, plus the minimal Gradio snippet from the project brief (input textbox → handler → answer textbox + sources textbox).
+  - Expected Output: An `app.py` that launches a Gradio Blocks UI on `http://localhost:7860` with one query input, an `Answer` box (LLM response with inline citations), and a `Retrieved from` box listing the unique source filenames the answer was grounded in. The handler delegates to `generate.answer()` — no business logic lives in the UI layer.
+  - Verification: Launch the app, ask each of the 5 evaluation questions plus one out-of-scope question, and capture the screen for the demo video. The `Retrieved from` box must populate for in-scope questions and the `Answer` box must show the refusal sentence for out-of-scope ones.
