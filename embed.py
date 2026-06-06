@@ -8,7 +8,7 @@ Retrieval demo:
     python embed.py --query "is bike theft common around USC"          # default top-4
     python embed.py --query "safest streets at night" -k 6
 
-Importable from downstream code (e.g. the Milestone 5 generation script):
+Importable from downstream code (e.g. the generation script):
     from embed import retrieve
     hits = retrieve("which complex has the worst elevators", k=4)
     for h in hits:
@@ -30,7 +30,7 @@ CHUNKS_PATH = REPO_ROOT / "documents" / "chunks.jsonl"
 CHROMA_DIR = REPO_ROOT / "chroma_db"
 COLLECTION_NAME = "unofficial_guide"
 EMBED_MODEL = "all-MiniLM-L6-v2"
-DEFAULT_TOP_K = 4
+DEFAULT_TOP_K = 5
 
 # Built once at module load: the same SentenceTransformer instance is reused for indexing
 # AND for query-time embedding (ChromaDB stores the embedding_function on the collection

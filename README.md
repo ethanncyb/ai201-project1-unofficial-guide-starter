@@ -126,8 +126,15 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 
 **Model used:**
 
+- `all-MiniLM-L6-v2` via `sentence-transformers` chosen because it runs locally, produces strong semantic embeddings for conversational and review-style text, and requires no API key or external service.
+
 **Production tradeoff reflection:**
 
+- **Domain-specific accuracy:** `all-MiniLM-L6-v2` is a general-purpose model. For better performance on Reddit/Yelp slang and domain-specific phrasing, a model fine-tuned on conversational or review data would likely improve retrieval precision.
+- **Context length:** This project chunks documents (~200 tokens) before embedding. If we needed to embed very large documents without chunking, prefer embedding models that support larger context windows or use hierarchical retrieval.
+- **Latency & scalability:** Local models give low-latency, cost-free inference for development and grading, but require more operational effort to scale. Hosted API models simplify scaling at monetary cost.
+- **Multilingual & robustness:** If supporting other languages or noisy text, consider multilingual or larger transformer models that handle slang/typos more robustly.
+- **Operational note:** `all-MiniLM-L6-v2` was selected to keep the pipeline reproducible on a local machine. Changing the embedding model requires rebuilding the ChromaDB index (`embed.py --rebuild`).
 ---
 
 ## Grounded Generation
