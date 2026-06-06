@@ -170,5 +170,12 @@ The grounding contract lives in the system prompt at the Prompt assembly step: t
   - Expected Output: Python code utilizing LangChain's text splitter to break the documents down according to my exact parameters, plus a function to print out 5 representative chunks so I can manually inspect their quality before moving on.  
 
 **Milestone 4 — Embedding and retrieval:**
+- Task 1: Embedding & Retrieval Script
+  - Input: My Retrieval Approach section plus the chunks.jsonl format from Milestone 3 and the requirement that top-K = 4.
+  - Expected Output: A Python script (`embed.py`) that indexes the chunks into a persistent ChromaDB collection with source metadata (source filename, source_id, source_type, parent_title, chunk_index) and exposes a `retrieve(query, k)` function importable by Milestone 5. The script should also explain any non-obvious ChromaDB API patterns inline (PersistentClient vs Client, embedding function bound to the collection, cosine distance, upsert idempotence).
+
+- Task 2: Retrieval Test Harness
+  - Input: My 5 evaluation questions from the Evaluation Plan section above, plus the distance thresholds (best < 0.5 = good, 0.5–0.6 = weak, ≥0.6 = bad).
+  - Expected Output: A standalone `test_retrieval.py` that runs each query through `retrieve()`, prints the top-k hits with distance + source + parent_title + preview, and a verdict per query.
 
 **Milestone 5 — Generation and interface:**
