@@ -1,26 +1,28 @@
-"""Grounded generation using the Groq LLM.
+"""Grounded generation using the Groq LLM with paper-style numbered citations.
 
-Pulls the top-k chunks from `embed.retrieve()`, builds a strict grounding
-prompt, calls Groq's `llama-3.3-70b-versatile`, and programmatically returns
-the unique source filenames alongside the answer so attribution does not
-depend on the model remembering to cite (the system prompt also asks it to
-cite inline, but we don't trust that alone).
+Pulls the top-k chunks from `embed.retrieve()`, assigns a citation number per
+unique source (first-seen-first-numbered), builds a strict grounding prompt
+that tells the LLM to cite with `[1]` / `[2]`, calls Groq's
+`llama-3.3-70b-versatile`, and programmatically appends a `References:`
+block to the answer so attribution survives even if the model forgets to
+cite inline.
 
 Importable:
     from generate import answer
     result = answer("which streets are safest at night?")
     print(result["answer"])
-    print(result["sources"])
+    print(result["sources"])   # [{"number": 1, "source": "source_10_reddit_clean.txt"}, ...]
 
 CLI:
-    python generate.py --query "..."         # one-off generation
-    python generate.py -q "..." -k 6         # override top-k
+    python generate.py -q "..."                              # one-off generation
+    python generate.py -q "..." -k 6 -t 0.4 --max-tokens 800
 """
 
 from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -35,54 +37,90 @@ REPO_ROOT = Path(__file__).parent
 load_dotenv(REPO_ROOT / ".env")
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_TEMPERATURE = 0.2
+DEFAULT_MAX_TOKENS = 512
 
-# Strict grounding contract. The retrieved chunks are injected into {context};
-# the user's question is sent as the user message. Rule 3's refusal string is
-# exact-match so the README evaluation can grep for it.
-SYSTEM_PROMPT = """You are "The Unofficial Guide," a careful assistant that answers questions about off-campus housing near USC / Downtown LA using only the student-generated documents provided below.
+# Strict grounding contract. {context} is replaced with the retrieved chunks,
+# each prefixed by a `[N] source_filename — parent_title` header so the LLM
+# can cite with `[N]`. Rule 3's refusal string is verbatim so the README
+# evaluation table and the test harness can grep for it.
+SYSTEM_PROMPT = """You are "The Unofficial Guide," a careful assistant that answers questions about off-campus housing AND day-to-day living near USC / Downtown LA — including building reviews, shuttle reliability, neighborhood safety, supermarkets and nearby amenities, transit, commuting, and the everyday realities of living in the area. Use only the student-generated documents provided below.
 
 Strict rules — follow all of them:
 1. Answer ONLY using the information in the documents below. Do not use outside knowledge, prior training, or general assumptions.
-2. Cite the source filename in square brackets immediately after any claim drawn from it — e.g. "Shuttles are often late [source_8_yelp_clean.txt]." If a sentence combines multiple sources, cite each one.
+2. Cite sources inline using bracketed numbers like [1] or [1][2]. The numbers correspond to the [N] source_filename headers in the Documents block below. Do not invent new citation numbers and do not write filenames inline — use only the numbers.
 3. If the documents do not contain enough information to answer the question, reply with exactly this sentence and nothing else: I don't have enough information on that.
 4. Do not invent facts, building names, prices, quotes, or details. If something is not in the documents, leave it out.
-5. Keep the answer concise — a short paragraph or a few bullets is usually enough.
+5. Keep the answer concise — a short paragraph or a few bullets is usually enough. Do not write your own "References:" section at the end; one is appended programmatically.
 
 Documents:
 {context}"""
 
+REFUSAL = "I don't have enough information on that."
 
-def _build_context(hits: list[dict]) -> str:
-    # Each chunk gets a header with its source filename (so the LLM can cite
-    # by name) and its parent_title when present (so "this building" / "it"
-    # references in the chunk are still disambiguated — this is the mitigation
-    # for the "Lost Pronoun Context Across Chunks" risk in planning.md).
+# Matches inline citations like [1], [12], etc. Used to figure out which
+# citation numbers the LLM actually wrote in its answer, so we can render a
+# References block that only lists the cited sources (not every retrieved
+# one). Anchored to digits-only to avoid matching things like [URL] or [...].
+CITATION_PATTERN = re.compile(r"\[(\d+)\]")
+
+
+def _cited_numbers(body: str) -> set[int]:
+    """Return the set of [N] citation numbers actually used in `body`."""
+    return {int(m.group(1)) for m in CITATION_PATTERN.finditer(body)}
+
+
+def _assign_citation_numbers(hits: list[dict]) -> list[dict]:
+    """Walk hits in retrieval order, assign [1], [2], … per unique source filename.
+
+    Returns a list of dicts {"number": int, "source": str} in citation order
+    (so index 0 is `[1]`, index 1 is `[2]`, etc.).
+    """
+    seen: dict[str, int] = {}
+    refs: list[dict] = []
+    for h in hits:
+        src = h["metadata"]["source"]
+        if src not in seen:
+            seen[src] = len(seen) + 1
+            refs.append({"number": seen[src], "source": src})
+    return refs
+
+
+def _build_context(hits: list[dict], number_for: dict[str, int]) -> str:
+    # Each chunk renders under a `[N] source — parent_title` header so the LLM
+    # knows which number to cite. Chunks sharing a source share a number,
+    # matching the academic-paper reference style.
     blocks = []
     for h in hits:
         m = h["metadata"]
+        n = number_for[m["source"]]
         title = m.get("parent_title") or ""
-        header = f"[source: {m['source']}]"
+        header = f"[{n}] {m['source']}"
         if title:
             header += f" — {title}"
         blocks.append(f"{header}\n{h['text']}")
     return "\n\n---\n\n".join(blocks)
 
 
-def _unique_sources(hits: list[dict]) -> list[str]:
-    # Dedupe while preserving retrieval order so the most-relevant source
-    # appears first in the citation list.
-    seen: set[str] = set()
-    out: list[str] = []
-    for h in hits:
-        s = h["metadata"]["source"]
-        if s not in seen:
-            seen.add(s)
-            out.append(s)
-    return out
+def _format_references(refs: list[dict]) -> str:
+    return "\n".join(f"[{r['number']}] {r['source']}" for r in refs)
 
 
-def answer(query: str, k: int = DEFAULT_TOP_K) -> dict:
-    """Run retrieval + grounded generation. Returns answer, sources, raw hits."""
+def answer(
+    query: str,
+    k: int = DEFAULT_TOP_K,
+    temperature: float = DEFAULT_TEMPERATURE,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+) -> dict:
+    """Run retrieval + grounded generation.
+
+    Returns:
+      - "answer":  LLM prose with inline [N] citations, followed by a
+                   programmatic `References:` block (omitted when the model
+                   returns the exact refusal sentence).
+      - "sources": [{"number": int, "source": str}, ...] in citation order.
+      - "hits":    raw retrieval list (for the UI debug panel).
+    """
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise RuntimeError(
@@ -91,24 +129,39 @@ def answer(query: str, k: int = DEFAULT_TOP_K) -> dict:
 
     hits = retrieve(query, k=k)
     if not hits:
-        return {
-            "answer": "I don't have enough information on that.",
-            "sources": [],
-            "hits": [],
-        }
+        return {"answer": REFUSAL, "sources": [], "hits": []}
+
+    refs = _assign_citation_numbers(hits)
+    number_for = {r["source"]: r["number"] for r in refs}
 
     client = Groq(api_key=api_key)
     completion = client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT.format(context=_build_context(hits))},
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT.format(context=_build_context(hits, number_for)),
+            },
             {"role": "user", "content": query},
         ],
-        # Low temperature: grounded QA wants faithful, deterministic answers.
-        temperature=0.2,
+        temperature=temperature,
+        max_tokens=max_tokens,
     )
-    text = (completion.choices[0].message.content or "").strip()
-    return {"answer": text, "sources": _unique_sources(hits), "hits": hits}
+    body = (completion.choices[0].message.content or "").strip()
+
+    # Don't append references when the model legitimately refused — the brief
+    # wants the refusal sentence to be the entire response.
+    if body == REFUSAL:
+        return {"answer": body, "sources": [], "hits": hits}
+
+    # Filter the References block to only the citations the model actually used.
+    # If the model wrote an answer but cited nothing, fall back to listing every
+    # retrieved source so the viewer still sees what the answer was drawn from.
+    cited = _cited_numbers(body)
+    shown_refs = [r for r in refs if r["number"] in cited] if cited else refs
+
+    answer_text = f"{body}\n\nReferences:\n{_format_references(shown_refs)}"
+    return {"answer": answer_text, "sources": refs, "hits": hits}
 
 
 def main() -> int:
@@ -120,14 +173,33 @@ def main() -> int:
         default=DEFAULT_TOP_K,
         help=f"top-k chunks (default {DEFAULT_TOP_K})",
     )
+    parser.add_argument(
+        "-t",
+        "--temperature",
+        type=float,
+        default=DEFAULT_TEMPERATURE,
+        help=f"Groq sampling temperature (default {DEFAULT_TEMPERATURE})",
+    )
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=DEFAULT_MAX_TOKENS,
+        help=f"cap on LLM response length (default {DEFAULT_MAX_TOKENS})",
+    )
     args = parser.parse_args()
 
-    result = answer(args.query, k=args.k)
+    result = answer(
+        args.query,
+        k=args.k,
+        temperature=args.temperature,
+        max_tokens=args.max_tokens,
+    )
     print("\n=== Answer ===\n")
     print(result["answer"])
-    print("\n=== Sources retrieved ===")
-    for s in result["sources"]:
-        print(f"  - {s}")
+    if result["sources"]:
+        print("\n=== Sources (cite map) ===")
+        for r in result["sources"]:
+            print(f"  [{r['number']}] {r['source']}")
     return 0
 
 

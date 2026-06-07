@@ -9,7 +9,7 @@ Distance verdicts follow the thresholds:
 Usage:
     python test_retrieval.py            # run all 5 queries
     python test_retrieval.py 1 3 5      # run specific query IDs
-    python test_retrieval.py -k 6       # override top-k (default = embed.DEFAULT_TOP_K = 4)
+    python test_retrieval.py -k 6       # override top-k (default = embed.DEFAULT_TOP_K = 5)
 """
 
 from __future__ import annotations

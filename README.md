@@ -148,7 +148,24 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 
 **System prompt grounding instruction:**
 
+The system prompt defined in `generate.py` (`SYSTEM_PROMPT`) enforces grounding through five strict rules that get sent on every call.
+
+* The prompt opens by naming the assistant "The Unofficial Guide" and scoping it to off-campus housing and day-to-day living near USC and Downtown LA. The scope explicitly covers building reviews, shuttle reliability, neighborhood safety, supermarkets, transit, and other everyday realities of the area.
+* Rule 1 tells the model to answer ONLY using the retrieved documents and to ignore prior training or outside knowledge.
+* Rule 2 tells the model to cite inline using bracketed numbers like [1] or [1][2]. The numbers correspond to the [N] source_filename headers in the documents block, and the model is told not to invent new numbers or write filenames inline.
+* Rule 3 forces the model to reply with the exact sentence "I don't have enough information on that" when the documents do not cover the question. The exact wording is important because the UI, the test harness, and the evaluation table all rely on matching that string to detect the refusal path.
+* Rule 4 forbids inventing facts, building names, prices, quotes, or details.
+* Rule 5 asks for a concise paragraph or short bullets, and tells the model NOT to write its own References section because one is appended programmatically.
+
 **How source attribution is surfaced in the response:**
+
+Attribution is handled both inline by the model and as a programmatic References block, so it is verifiable even if the model misbehaves.
+
+* Before the prompt is sent, `_assign_citation_numbers` in `generate.py` walks the retrieved chunks in retrieval order and assigns a number to each unique source filename. Chunks that share a source share a number, matching academic paper citation style.
+* `_build_context` then renders each chunk under a header that includes the citation number, the source filename, and the parent_title metadata (thread title for Reddit, dorm name for RateMyDorm, business for Yelp, wiki title for wiki). This is how the model knows which number to use when it cites a chunk.
+* After the model returns its answer, the code parses the inline citations with a regex (`CITATION_PATTERN`), keeps only the sources the model actually cited, and appends a programmatic `References:` block listing them in citation order.
+* The References block is skipped when the model returns the exact refusal sentence, so refusals never carry fake attributions.
+* In the Gradio UI, the same citation numbers also drive the "Retrieved chunks" debug panel, which shows the rank, citation number, source, parent_title, cosine distance, and a short preview for every chunk that was sent to the model. This lets a reviewer confirm exactly what the model was given before it wrote its answer.
 
 ---
 
@@ -160,11 +177,11 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 
 | # | Question | Expected answer | System response (summarized) | Retrieval quality | Response accuracy |
 |---|----------|-----------------|------------------------------|-------------------|-------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | How are the reliability and wait times of the shuttles at The Residences at Lorenzo? | The shuttles are rarely on time and are often crowded to maximum capacity. | Mentions that Lorenzo has a free shuttle, but primarily retrieves complaints about broken elevators, package delivery, and other amenities. It does not address shuttle reliability or wait times. | Partially relevant | Inaccurate |
+| 2 | Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night? | 30th St, 29th St, Ellendale Place, Orchard Ave, and USC Village. | Recommends staying on 36th or 37th streets or within the "USC bubble" bounded by Expo, Fig, Adams, and Vermont. | Partially relevant | Inaccurate |
+| 3 | When comparing Tuscany and Icon, which apartment complex is more expensive? | Icon Plaza is generally more expensive because it offers true private single-bedroom units. | States that Tuscany is not that expensive, while Icon is considered really expensive, but lacks the specific reasoning about single-bedroom units. | Relevant | Partially accurate |
+| 4 | Which off-campus housing companies or apartment buildings offer furnished rooms or lenient guarantor requirements for international students? | International students frequently choose housing companies such as Tripalink, Stuho, and Orion Housing, as well as large apartment complexes like The Lorenzo and University Gateway. | Retrieves discussions from international/transfer students mentioning Gateway, Hub, and Mosaic student housing, but does not mention lenient guarantor requirements or the specific companies expected. | Partially relevant | Inaccurate |
+| 5 | What are the most common daily annoyances regarding the elevators and street noise at University Gateway? | Tenants frequently complain that the eight available elevators take too long to arrive during peak morning hours and other busy times. Units facing the main roads also experience high levels of city and traffic noise. | Mentions that elevators have been broken for nearly a month and are out of service, but misses the specific details about "eight available elevators" and "peak morning hours". | Relevant | Partially accurate |
 
 **Retrieval quality:** Relevant / Partially relevant / Off-target  
 **Response accuracy:** Accurate / Partially accurate / Inaccurate
@@ -185,12 +202,25 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
      results from an unrelated review" is an explanation. -->
 
 **Question that failed:**
+> How are the reliability and wait times of the shuttles at The Residences at Lorenzo?
 
 **What the system returned:**
+>I don't have enough information on that.
 
 **Root cause (tied to a specific pipeline stage):**
 
+* My first guess was that this was a chunking problem. I thought the relevant shuttle details might have been split across chunk boundaries, so retrieval was only returning partial context.
+* To test that theory, I rephrased the question to ask about general commute issues, but the system returned the same kind of incomplete answer.
+* The real root cause sits upstream of chunking. The source data itself does not contain enough detail on shuttle reliability or wait times.
+* The Lorenzo Yelp reviews acknowledge that a shuttle exists, but reviewers focused their complaints on elevators, package delivery, and noise. Wait times are not discussed.
+* A secondary issue lived in the generation stage. My original system prompt was scoped too narrowly to "housing questions only", so transit adjacent questions were sometimes refused even when partial information was available.
+
 **What you would change to fix it:**
+
+* I widened the generation prompt from "only housing questions" to "housing and any living related question, including buses, area, and safety". This lets the model surface adjacent information instead of refusing outright.
+* I confirmed the data gap by asking "How are the reliability and wait times of the shuttles" again without the Lorenzo qualifier. The system correctly returned that Lorenzo has a shuttle but that no document describes its reliability.
+* On the data side, the fix would be to add a source that specifically covers shuttle experiences, such as a Reddit thread on USC area transportation or rider side reviews of the Lorenzo shuttle.
+
 
 ---
 
@@ -201,7 +231,20 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 
 **One way the spec helped you during implementation:**
 
+The five evaluation questions I wrote in `planning.md` ended up being the most useful part of the spec for me.
+
+* Having those questions locked in before any pipeline code was written gave me a fixed target to test against at every stage.
+* When an answer came back wrong, the fixed questions let me trace the failure to a specific stage. If retrieval was pulling the wrong chunks, the problem was likely chunk size or the embedding model. If retrieval looked correct but the answer was still off, the problem was almost always the generation prompt or a gap in the source data.
+* The shuttle question is a clear example. Retrieval surfaced Lorenzo content but the final answer was still wrong, which told me the issue was not in chunking but further down the pipeline in generation and data coverage.
+* Without that fixed list of questions, I would have spent a lot more time changing settings at random without knowing which stage I was actually improving.
+
 **One way your implementation diverged from the spec, and why:**
+
+For the UI design, I did not write much detail in `planning.md` up front.
+
+* The first Gradio implementation Claude produced was just a query box and a single answer box, with no debug or verbose information.
+* After seeing that output, I went back and updated my prompt to ask for a verbose audit panel showing the retrieved chunks, plus a sidebar with temperature and top_k sliders so the result could be fine tuned at query time.
+* The final `app.py` reflects that revised design, not the minimal one the spec originally implied.
 
 ---
 
@@ -218,12 +261,12 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 
 **Instance 1**
 
-- *What I gave the AI:*
-- *What it produced:*
-- *What I changed or overrode:*
+* *What I gave the AI:* I gave Claude my UI plan from `planning.md` and asked it to scaffold the Gradio app in `app.py`. The plan only said "a Gradio interface that takes a question and shows the answer".
+* *What it produced:* A minimal Gradio app with one input textbox, an Ask button, and a single answer output. There was no way to see which chunks were retrieved and no way to adjust top_k or temperature without editing the code.
+* *What I changed or overrode:* I rewrote the prompt to specify a `Blocks` layout with a left sidebar for top_k, temperature, and max_tokens sliders, plus a main panel containing both an Answer box and a separate debug panel for the retrieved chunks. That panel shows rank, source, parent_title, cosine distance, and a preview for each hit. The final `app.py` matches that revised design.
 
 **Instance 2**
 
-- *What I gave the AI:*
-- *What it produced:*
-- *What I changed or overrode:*
+* *What I gave the AI:* I gave Claude the grounded generation requirements from the rubric and asked it to write the system prompt for `generate.py`. My initial instruction said the assistant should only answer "off campus housing questions" and refuse anything else.
+* *What it produced:* A system prompt that refused any question not directly about apartments or dorms. During evaluation, the shuttle and safety questions started returning "I don't have enough information on that" even when relevant context was retrieved.
+* *What I changed or overrode:* I overrode the scope rule and asked Claude to broaden it to "housing and any living related question, including buses, area, and safety". I also kept the strict citation and refusal rules from the original prompt, since those parts were working correctly and align with the rubric requirement for visible source attribution.
