@@ -154,41 +154,45 @@ The grounding contract lives in the system prompt at the Prompt assembly step: t
      - Which AI tool you plan to use (Claude, Copilot, ChatGPT, etc.)
      - What you'll give it as input (which sections of this planning.md, which requirements)
      - What you expect it to produce
-     - How you'll verify the output matches your spec
+     - How you'll verify the output matches your spec -->
 
-     "I'll use AI to help me code" is not a plan.
-     "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
-     with my specified chunk size and overlap" is a plan. -->
-  
+I'll be using **Claude Code** for every milestone. The plan per stage:
+
 **Milestone 3 — Ingestion and chunking:**
-- Task 1: Document Ingestion and Cleaning
-  - Input: I will provide the AI (Claude Code) with my Documents list, a sample of my manually copied .txt files from Reddit and Yelp, and specific instructions to remove noisy boilerplate like HTML tags, usernames, and navigation text.
-  - Expected Output: A Python script that successfully loads my raw text files from disk and cleans them, leaving only the substantive review text and context.
-  
-- Task 2: Implementing the Chunking Strategy
-  - Input: I will provide the AI with the cleaned text and the exact Chunking Strategy section from this spec (recursive character splitter, ~200 token size, ~40 token overlap).
-  - Expected Output: Python code utilizing LangChain's text splitter to break the documents down according to my exact parameters, plus a function to print out 5 representative chunks so I can manually inspect their quality before moving on.  
+
+- *Cleaning script*
+  - Ask: strip HTML tags, usernames, and navigation noise from the raw files.
+  - Give it: my Documents list + a few sample raw `.txt` files from Reddit and Yelp.
+  - Expect: a Python script that writes clean per-source text files.
+  - Check: eyeball one Reddit and one Yelp output — the review text should survive, the boilerplate should be gone.
+- *Chunking script*
+  - Ask: split the clean files with LangChain's recursive character splitter.
+  - Give it: my Chunking Strategy section (200 tokens, 40 overlap).
+  - Expect: a `chunk.py` that writes `chunks.jsonl` and can print sample chunks on demand.
+  - Check: inspect 5 sample chunks and confirm they roughly hit the target size.
 
 **Milestone 4 — Embedding and retrieval:**
-- Task 1: Embedding & Retrieval Script
-  - Input: My Retrieval Approach section plus the chunks.jsonl format from Milestone 3 and the requirement that top-K = 4.
-  - Expected Output: A Python script (`embed.py`) that indexes the chunks into a persistent ChromaDB collection with source metadata (source filename, source_id, source_type, parent_title, chunk_index) and exposes a `retrieve(query, k)` function importable by Milestone 5. The script should also explain any non-obvious ChromaDB API patterns inline (PersistentClient vs Client, embedding function bound to the collection, cosine distance, upsert idempotence).
 
-- Task 2: Retrieval Test Harness
-  - Input: My 5 evaluation questions from the Evaluation Plan section above, plus the distance thresholds (best < 0.5 = good, 0.5–0.6 = weak, ≥0.6 = bad).
-  - Expected Output: A standalone `test_retrieval.py` that runs each query through `retrieve()`, prints the top-k hits with distance + source + parent_title + preview, and a verdict per query.
+- *Indexing + retrieval*
+  - Ask: build a ChromaDB collection from `chunks.jsonl` and expose a `retrieve(query, k)` helper.
+  - Give it: my Retrieval Approach section (all-MiniLM-L6-v2, top-k = 5).
+  - Expect: an `embed.py` with source metadata attached to every chunk.
+  - Check: run a one-off `--query` and confirm the top hit feels reasonable.
+- *Test harness*
+  - Ask: run all 5 evaluation questions through `retrieve()` and print a verdict per query.
+  - Give it: my 5 evaluation questions + the distance thresholds (<0.5 good, 0.5–0.6 weak, ≥0.6 bad).
+  - Expect: a `test_retrieval.py` that prints rank, distance, source, and a preview per hit.
+  - Check: sanity-check the verdicts against my expected answers.
 
 **Milestone 5 — Generation and interface:**
-- Task 1: Grounded Generation Script
-  - Input: I will provide the AI with my Retrieval Approach (top-k = 5 against the existing `retrieve()` helper in `embed.py`), the broadened agent scope (housing AND day-to-day living near USC — shuttles, neighborhood safety, supermarkets, transit, amenities), the strict grounding contract (answer only from retrieved chunks, refuse with "I don't have enough information on that" when context is insufficient), the paper-style citation rule (cite with `[N]` numbered brackets, one number per unique source filename), and the Groq model choice (`llama-3.3-70b-versatile` via the `groq` SDK with `GROQ_API_KEY` loaded from `.env`).
-  - Expected Output: A `generate.py` module exposing `answer(query, k, temperature, max_tokens)` that calls `retrieve()`, assigns a citation number to each unique source in retrieval order, formats each chunk under a `[N] source — parent_title` header, calls Groq, and returns the answer with a programmatically appended `References:` block listing each `[N] filename`. The reference list is computed from chunk metadata so attribution does not depend on the LLM remembering to cite. The script also runs as a CLI (`python generate.py -q "..." -k 5 -t 0.2 --max-tokens 512`) for quick spot checks.
-  - Verification: Run the 5 evaluation questions from this spec through the CLI and confirm each answer is grounded in the cited chunks; run a daily-living question (e.g. "are there supermarkets within walking distance?") to verify the broadened scope; run one out-of-scope question (e.g. a question about Mars weather) and confirm the system returns the exact refusal sentence with no References block.
 
-- Task 2: Gradio Web Interface
-  - Input: The `answer()` function from Task 1, plus the minimal Gradio snippet from the project brief (input textbox → handler → answer textbox + secondary textbox), extended with a sidebar for runtime parameter tuning.
-  - Expected Output: An `app.py` that launches a Gradio Blocks UI on `http://localhost:7860` with:
-    - A left **sidebar** holding three sliders bound to `top_k` (1–10, default 5), `temperature` (0.0–1.0 step 0.05, default 0.2), and `max_tokens` (128–2048 step 64, default 512).
-    - A query input textbox + Ask button.
-    - An `Answer` box showing the LLM response with inline `[N]` citations and the trailing `References:` block.
-    - A `Debug — Retrieved chunks` box (verbose audit panel) listing each retrieved chunk's rank, citation number, source filename, parent_title, cosine distance, and a ~300-char text preview, plus a header line echoing the active params. The handler delegates to `generate.answer()` — no business logic lives in the UI layer.
-  - Verification: Launch the app, ask each of the 5 evaluation questions plus a daily-living question and one out-of-scope question. Tweak the sidebar sliders to confirm `top_k` changes the number of debug rows and `temperature` / `max_tokens` change the answer behavior. Capture the screen for the demo video; the `Answer` box must show inline `[N]` citations + References list for in-scope questions, the refusal sentence for out-of-scope ones, and the debug box must always show what was retrieved.
+- *Grounded generation*
+  - Ask: wire up Groq's `llama-3.3-70b-versatile` behind a strict grounding prompt.
+  - Give it: the grounding contract (answer only from retrieved chunks, refuse with the exact sentence "I don't have enough information on that"), the `[N]` citation rule, and the broadened scope (housing + daily living near USC).
+  - Expect: a `generate.py` with an `answer()` function and a CLI for spot checks.
+  - Check: run the 5 eval questions plus one out-of-scope query. The refusal should trigger cleanly and the References block should list real sources.
+- *Gradio UI*
+  - Ask: build a Blocks UI that wraps `answer()`.
+  - Give it: the minimal Gradio snippet from the brief + my sidebar plan (top_k, temperature, max_tokens sliders).
+  - Expect: an `app.py` with a question box, an Answer box, and a debug panel showing the retrieved chunks.
+  - Check: launch the app and move the sliders to confirm they actually change what the LLM sees.

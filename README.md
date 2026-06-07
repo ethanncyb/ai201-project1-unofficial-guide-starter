@@ -137,6 +137,48 @@ Per-type split: 101 Reddit, 46 Yelp, 13 RateMyDorm, 5 wiki. The full set is pers
 - **Operational note:** `all-MiniLM-L6-v2` was selected to keep the pipeline reproducible on a local machine. Changing the embedding model requires rebuilding the ChromaDB index (`embed.py --rebuild`).
 ---
 
+## Retrieval Examples
+
+<!-- Three example queries with the actual top-k chunks the retriever returned.
+     Pulled verbatim from `test_retrieval_output.txt`, trimmed to the top 3 hits per query
+     for readability. Relevance commentary is provided for examples 1 and 2. -->
+
+### Example 1 — "Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night?"
+
+Top 3 hits (out of k=5):
+
+| Rank | Distance | Source | Preview |
+|------|----------|--------|---------|
+| 1 | 0.354 | `source_10_reddit_clean.txt#27` — *"Honestly, what is the area around USC like for a single female?"* | Comment by Gatodeluna: It's infamously not a safe area in general. If you insist on living very close to campus, you very likely will not feel safe… |
+| 2 | 0.356 | `source_6_reddit_clean.txt#1` — *"OFF CAMPUS HOUSING"* | Reply by Total_Opinion9205: for south of expo, high crime (lots of MS13 activity), no patrolling… if you stay on 36th or 37th place/streets, they are safe all the way to S Western Avenue… |
+| 3 | 0.359 | `source_10_reddit_clean.txt#13` — *"Honestly, what is the area around USC like for a single female?"* | Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night… |
+
+**Why these chunks are relevant:** The query asks about "safe streets" and "USC at night," and the top three hits each name specific streets or boundaries — 36th/37th, the Expo-Fig-Adams-Vermont bubble, and the "block by block" caveat. The first-position hit is from a thread literally titled "what is the area around USC like for a single female?", which is the corpus's densest discussion of nighttime safety. The MiniLM embedding model lined up the safety vocabulary across very different sources (a single-female-safety thread and a general housing thread) without keyword matching on "street names."
+
+### Example 2 — "Which off-campus housing companies or apartment buildings offer furnished rooms or lenient guarantor requirements for international students?"
+
+Top 3 hits (out of k=5):
+
+| Rank | Distance | Source | Preview |
+|------|----------|--------|---------|
+| 1 | 0.337 | `source_4_reddit_clean.txt#0` — *"Best off-campus housing options for International/Transfer students!"* | Thread Title: Best off-campus housing options for International/Transfer students! Original Post by Slow_Relationship170: I'm an incoming international sophomore transfer from Portugal!… |
+| 2 | 0.377 | `source_3_reddit_clean.txt#7` — *"Off Campus Housing"* | Comment by Content_Award_3202: same boat here ..I am looking for off-campus housing as a transfer student. Trying to balance close to campus for safety… |
+| 3 | 0.378 | `source_2_reddit_clean.txt#8` — *"Does anyone live in an off campus housing that they actually like"* | Comment by brendandank: I'm with mosaic student housing and I'm absolutely loving it so far!… Reply by SadEmotion8310: my thing is they're unfurnished for the most part, do you know of any h…|
+
+**Why these chunks are relevant:** The query has three distinct concepts — "international students," "furnished," and "guarantor." The top hit is a thread whose title explicitly targets international/transfer students, which is the strongest possible semantic match in the corpus. The third hit is interesting because it surfaces a discussion of "unfurnished vs furnished," even though the word "furnished" isn't in the chunk title — that's the embedding model picking up the conceptual overlap rather than literal keywords.
+
+### Example 3 — "Which four streets form the perimeter of the USC bubble, an area noted for being highly patrolled by private security?"
+
+Top 3 hits (out of k=5):
+
+| Rank | Distance | Source | Preview |
+|------|----------|--------|---------|
+| 1 | 0.420 | `source_10_reddit_clean.txt#24` — *"Honestly, what is the area around USC like for a single female?"* | …in the few blocks directly around campus there are extra law enforcement patrols, it's called the "USC bubble" for a reason. |
+| 2 | 0.456 | `source_6_reddit_clean.txt#1` — *"OFF CAMPUS HOUSING"* | Reply by Total_Opinion9205: for south of expo, high crime… if you stay on 36th or 37th place/streets, they are safe all the way to S Western Avenue… |
+| 3 | 0.460 | `source_10_reddit_clean.txt#13` — *"Honestly, what is the area around USC like for a single female?"* | The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night… |
+
+---
+
 ## Grounded Generation
 
 <!-- Explain how your system enforces grounding — how does it prevent the LLM from answering
@@ -166,6 +208,124 @@ Attribution is handled both inline by the model and as a programmatic References
 * After the model returns its answer, the code parses the inline citations with a regex (`CITATION_PATTERN`), keeps only the sources the model actually cited, and appends a programmatic `References:` block listing them in citation order.
 * The References block is skipped when the model returns the exact refusal sentence, so refusals never carry fake attributions.
 * In the Gradio UI, the same citation numbers also drive the "Retrieved chunks" debug panel, which shows the rank, citation number, source, parent_title, cosine distance, and a short preview for every chunk that was sent to the model. This lets a reviewer confirm exactly what the model was given before it wrote its answer.
+
+### Example Responses
+
+**In-scope example 1 — safest streets at night**
+
+Command:
+
+```
+python generate.py -q "Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night?"
+```
+
+Answer (verbatim):
+
+```
+The area bounded by Expo-Fig-Adams-Vermont is considered a safe "bubble" around USC, with private security patrols and a lot of activity at all hours [1]. Additionally, the few blocks directly around campus have extra law enforcement patrols, known as the "USC bubble" [1]. For specific streets, 36th or 37th place/streets are mentioned as safe all the way to S Western Avenue, as long as you stay east of Vermont [2].
+
+References:
+[1] source_10_reddit_clean.txt
+[2] source_6_reddit_clean.txt
+```
+
+The `[1]` and `[2]` citations point to the r/AskLosAngeles single-female-safety thread and the r/USC OFF CAMPUS HOUSING thread, both of which are listed in the References block.
+
+**In-scope example 2 — Tuscany vs Icon pricing**
+
+Command:
+
+```
+python generate.py -q "When comparing Tuscany and Icon, which apartment complex is more expensive?"
+```
+
+Answer (verbatim):
+
+```
+According to the documents, Icon is mentioned as "really expensive" [3], while Tuscany is described as "not that expensive" [3]. Therefore, Icon is more expensive than Tuscany.
+
+References:
+[3] source_3_reddit_clean.txt
+```
+
+Both data points came from the same r/USC "Off Campus Housing" thread, so the model collapsed them under a single citation number. The References block only lists `[3]` because the regex filter (`generate.py:160-161`) drops cite numbers the model never used inline.
+
+**Out-of-scope example — refusal**
+
+Command:
+
+```
+python generate.py -q "What is the weather on Mars today?"
+```
+
+Answer (verbatim):
+
+```
+I don't have enough information on that.
+```
+
+No References block is appended on the refusal path — `generate.py:154` short-circuits before the References formatter runs, so the user sees exactly the sentence Rule 3 of the system prompt requires and nothing else.
+
+---
+
+## Query Interface
+
+<!-- Describe how a user actually interacts with the system, what they type in,
+     what they see come back, and one full sample interaction transcript. -->
+
+The interface is a Gradio Blocks app at `http://localhost:7860`, launched with `python app.py`.
+
+**Inputs:**
+
+- **Question textbox** — multi-line, with a sample-query placeholder.
+- **`top_k` slider** — 1 to 10, default 5. Controls how many chunks are retrieved and sent to the LLM.
+- **`temperature` slider** — 0.0 to 1.0, default 0.2. Lower = more faithful to the documents, higher = more variation in phrasing.
+- **`max_tokens` slider** — 128 to 2048, default 512. Caps the LLM response length.
+- **Ask button** — also triggers on pressing Enter inside the question box.
+
+**Outputs:**
+
+- **`Answer` textbox** — the LLM's prose response with inline `[N]` citations and the programmatic `References:` block appended at the bottom.
+- **`Debug — Retrieved chunks` textbox** — audit panel showing the active params header plus, per retrieved chunk: rank, citation number, source filename + chunk index, cosine distance, parent_title, and a ~300-char preview.
+
+**Sample interaction transcript:**
+
+User types into the question box:
+
+> Which streets near USC are considered safest at night?
+
+Sliders left at defaults (top_k=5, temperature=0.20, max_tokens=512). After clicking **Ask**, the two output boxes show:
+
+```
+=== Answer box ===
+According to [1], streets on 36th or 37th place/streets are considered safe all the way to S Western Avenue. Additionally, [2] mentions that the area bounded by Expo-Fig-Adams-Vermont is a safe bubble, patrolled by private security, and is safe day and night. However, it's also noted that safety can vary block by block [2].
+
+References:
+[1] source_6_reddit_clean.txt
+[2] source_10_reddit_clean.txt
+
+=== Debug — Retrieved chunks ===
+params: top_k=5  temperature=0.20  max_tokens=512
+retrieved 5 chunk(s)
+------------------------------------------------------------------------
+
+#1  [cite 1]  source_6_reddit_clean.txt#1  distance=0.357 — "OFF CAMPUS HOUSING"
+   Reply by Total_Opinion9205 to No-Comfortable-9520: for south of expo, high crime (lots of MS13 activity), no patrolling by police or usc security, few streetlights on at night, lots of break ins. i used to feel the same about west of…
+
+#2  [cite 2]  source_10_reddit_clean.txt#27  distance=0.400 — "Honestly, what is the area around USC like for a single female?"
+   Comment by Gatodeluna: It's infamously not a safe area in general. If you insist on living in the neighborhood very close to campus, you very likely will not feel safe…
+
+#3  [cite 2]  source_10_reddit_clean.txt#13  distance=0.409 — "Honestly, what is the area around USC like for a single female?"
+   Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night…
+
+#4  [cite 2]  source_10_reddit_clean.txt#28  distance=0.448 — "Honestly, what is the area around USC like for a single female?"
+   Reply by michiness to [deleted]: It's also super block by block. Some blocks are totally fine, some are pretty sketchy…
+
+#5  [cite 1]  source_6_reddit_clean.txt#0  distance=0.454 — "OFF CAMPUS HOUSING"
+   Thread Title: OFF CAMPUS HOUSING. Original Post by No-Comfortable-9520: Hey everyone, I'm an incoming grad student…
+```
+
+The debug panel always reflects exactly what was sent to the LLM, so a reviewer can verify the Answer's `[1]` and `[2]` map to real chunks at distances 0.357 and 0.400.
 
 ---
 
