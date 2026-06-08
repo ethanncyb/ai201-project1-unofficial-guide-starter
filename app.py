@@ -24,13 +24,20 @@ import gradio as gr
 from embed import DEFAULT_TOP_K
 from generate import DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE, answer
 
-PREVIEW_CHARS = 300
 
-
-def _format_debug(hits: list[dict], sources: list[dict], top_k: int, temperature: float, max_tokens: int) -> str:
-    # Build a source → citation number lookup so each chunk shows which [N]
-    # it contributes to (chunks from the same source share a number).
-    number_for = {r["source"]: r["number"] for r in sources}
+def _format_debug(
+    hits: list[dict],
+    sources: list[dict],
+    cited_numbers: set[int],
+    top_k: int,
+    temperature: float,
+    max_tokens: int,
+) -> str:
+    # Set of (source, chunk_index) for chunks that ended up in the displayed
+    # References block — those get a `[hit]` marker in the debug panel.
+    cited_chunks = {
+        (r["source"], r["chunk_index"]) for r in sources if r["number"] in cited_numbers
+    }
 
     header = (
         f"params: top_k={top_k}  temperature={temperature:.2f}  max_tokens={max_tokens}\n"
@@ -43,16 +50,14 @@ def _format_debug(hits: list[dict], sources: list[dict], top_k: int, temperature
     blocks: list[str] = [header]
     for i, h in enumerate(hits, 1):
         m = h["metadata"]
-        cite = number_for.get(m["source"], "—")
+        hit_marker = "[hit]  " if (m["source"], m["chunk_index"]) in cited_chunks else ""
         title = m.get("parent_title") or ""
         title_part = f' — "{title}"' if title else ""
         blocks.append(
-            f"\n#{i}  [cite {cite}]  {m['source']}#{m['chunk_index']}  "
+            f"\n#{i}  {hit_marker}{m['source']}#{m['chunk_index']}  "
             f"distance={h['distance']:.3f}{title_part}"
         )
-        text = h["text"]
-        preview = text if len(text) <= PREVIEW_CHARS else text[:PREVIEW_CHARS] + "…"
-        for line in preview.splitlines():
+        for line in h["text"].splitlines():
             blocks.append(f"   {line}")
     return "\n".join(blocks)
 
@@ -73,7 +78,14 @@ def handle_query(
         temperature=float(temperature),
         max_tokens=int(max_tokens),
     )
-    debug = _format_debug(result["hits"], result["sources"], int(top_k), float(temperature), int(max_tokens))
+    debug = _format_debug(
+        result["hits"],
+        result["sources"],
+        result["cited_numbers"],
+        int(top_k),
+        float(temperature),
+        int(max_tokens),
+    )
     return result["answer"], debug
 
 

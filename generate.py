@@ -71,31 +71,32 @@ def _cited_numbers(body: str) -> set[int]:
 
 
 def _assign_citation_numbers(hits: list[dict]) -> list[dict]:
-    """Walk hits in retrieval order, assign [1], [2], … per unique source filename.
+    """Assign [1], [2], … to each retrieved chunk in retrieval order.
 
-    Returns a list of dicts {"number": int, "source": str} in citation order
-    (so index 0 is `[1]`, index 1 is `[2]`, etc.).
+    Returns a list of dicts {"number": int, "source": str, "chunk_index": int}
+    in citation order (index 0 is `[1]`, index 1 is `[2]`, etc.). Each chunk
+    gets its own number, even if multiple chunks share a source filename.
     """
-    seen: dict[str, int] = {}
     refs: list[dict] = []
-    for h in hits:
-        src = h["metadata"]["source"]
-        if src not in seen:
-            seen[src] = len(seen) + 1
-            refs.append({"number": seen[src], "source": src})
+    for i, h in enumerate(hits, start=1):
+        m = h["metadata"]
+        refs.append({
+            "number": i,
+            "source": m["source"],
+            "chunk_index": m["chunk_index"],
+        })
     return refs
 
 
-def _build_context(hits: list[dict], number_for: dict[str, int]) -> str:
-    # Each chunk renders under a `[N] source — parent_title` header so the LLM
-    # knows which number to cite. Chunks sharing a source share a number,
-    # matching the academic-paper reference style.
+def _build_context(hits: list[dict], refs: list[dict]) -> str:
+    # Each chunk renders under a `[N] source#chunk_index — parent_title` header
+    # so the LLM cites with the chunk-specific number. Each chunk gets its own
+    # number, in retrieval order.
     blocks = []
-    for h in hits:
+    for h, r in zip(hits, refs):
         m = h["metadata"]
-        n = number_for[m["source"]]
         title = m.get("parent_title") or ""
-        header = f"[{n}] {m['source']}"
+        header = f"[{r['number']}] {m['source']}#{m['chunk_index']}"
         if title:
             header += f" — {title}"
         blocks.append(f"{header}\n{h['text']}")
@@ -103,7 +104,7 @@ def _build_context(hits: list[dict], number_for: dict[str, int]) -> str:
 
 
 def _format_references(refs: list[dict]) -> str:
-    return "\n".join(f"[{r['number']}] {r['source']}" for r in refs)
+    return "\n".join(f"[{r['number']}] {r['source']}#{r['chunk_index']}" for r in refs)
 
 
 def answer(
@@ -118,7 +119,8 @@ def answer(
       - "answer":  LLM prose with inline [N] citations, followed by a
                    programmatic `References:` block (omitted when the model
                    returns the exact refusal sentence).
-      - "sources": [{"number": int, "source": str}, ...] in citation order.
+      - "sources": [{"number": int, "source": str, "chunk_index": int}, ...]
+                   in citation order (one entry per retrieved chunk).
       - "hits":    raw retrieval list (for the UI debug panel).
     """
     api_key = os.environ.get("GROQ_API_KEY")
@@ -129,10 +131,9 @@ def answer(
 
     hits = retrieve(query, k=k)
     if not hits:
-        return {"answer": REFUSAL, "sources": [], "hits": []}
+        return {"answer": REFUSAL, "sources": [], "hits": [], "cited_numbers": set()}
 
     refs = _assign_citation_numbers(hits)
-    number_for = {r["source"]: r["number"] for r in refs}
 
     client = Groq(api_key=api_key)
     completion = client.chat.completions.create(
@@ -140,7 +141,7 @@ def answer(
         messages=[
             {
                 "role": "system",
-                "content": SYSTEM_PROMPT.format(context=_build_context(hits, number_for)),
+                "content": SYSTEM_PROMPT.format(context=_build_context(hits, refs)),
             },
             {"role": "user", "content": query},
         ],
@@ -152,16 +153,17 @@ def answer(
     # Don't append references when the model legitimately refused — the brief
     # wants the refusal sentence to be the entire response.
     if body == REFUSAL:
-        return {"answer": body, "sources": [], "hits": hits}
+        return {"answer": body, "sources": [], "hits": hits, "cited_numbers": set()}
 
     # Filter the References block to only the citations the model actually used.
     # If the model wrote an answer but cited nothing, fall back to listing every
     # retrieved source so the viewer still sees what the answer was drawn from.
     cited = _cited_numbers(body)
     shown_refs = [r for r in refs if r["number"] in cited] if cited else refs
+    cited_numbers = {r["number"] for r in shown_refs}
 
     answer_text = f"{body}\n\nReferences:\n{_format_references(shown_refs)}"
-    return {"answer": answer_text, "sources": refs, "hits": hits}
+    return {"answer": answer_text, "sources": refs, "hits": hits, "cited_numbers": cited_numbers}
 
 
 def main() -> int:
