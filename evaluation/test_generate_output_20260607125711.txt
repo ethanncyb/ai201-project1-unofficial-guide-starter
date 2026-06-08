@@ -1,0 +1,73 @@
+Running 2 eval question(s) through generate.answer() at top-k=5, temperature=0.2, max_tokens=512
+
+==========================================================================================
+Q1: How are the reliability and wait times of the shuttles at The Residences at Lorenzo?
+Expected: The shuttles are rarely on time and are often crowded to maximum capacity.
+------------------------------------------------------------------------------------------
+
+  [refusal: yes]
+
+  --- System answer ---
+  I don't have enough information on that.
+
+  --- Retrieved chunks (k=5) ---
+
+  #1  distance=0.467  source_8_yelp_clean.txt#12 — "The Residences at Lorenzo"
+     Reply by J T. (Business Owner) to Butian X. (Jan 24, 2026): Hi Butian, Thank you again for taking the time to share your detailed feedback. While we have already responded to your review on Google, we also wanted to acknowledge your comments here as well. We’re sorry to hear that your experience at The Lorenzo has not met expectations, and we understand how frustrating ongoing concerns such as ele…
+
+  #2  distance=0.486  source_3_reddit_clean.txt#3 — "Off Campus Housing"
+     Reply by Optimal-Yak-8975 to Slow_Relationship170: ohhh yeah the standard looks real nice 🙃 let’s keep in touch lol
+     
+     Comment by LexLuther48: Would avoid Gateway. It’s on Fig (lots of police/fire truck activity), the amenities are bad (advertises a pool but it’s literally just a shallow splash zone), and infrastructure of the rooms are not great for the price. Lorenzo has a free shuttle that will b…
+
+  #3  distance=0.487  source_8_yelp_clean.txt#7 — "The Residences at Lorenzo"
+     Reply by Karla A. (Business Owner) to AZ A. (May 19, 2025): Hi AZ, Thank you for taking the time to share your detailed feedback. We’re sorry to hear that your experience at The Residences at Lorenzo fell short of expectations. We understand your concerns and sincerely regret the frustration you've experienced with package delivery, gym conditions, elevator access, hot water availability, and unit…
+
+  #4  distance=0.498  source_2_reddit_clean.txt#14 — "Does anyone live in an off campus housing that they actually like"
+     Comment by alashia_: $1499– Private Room & Private In room Bathroom in 3x3 at The Lorenzo (Aug 2026–July 2027 Lease) This is for ONE bed in a private room within a 3 Bed / 3 Bath apartment at The Lorenzo. Rent is just $1499/month + $ 90 utilities — extremely affordable for everything included. Fully furnished apartment, private bathroom access, modern kitchen, in-unit laundry, and a spacious livin…
+
+  #5  distance=0.513  source_3_reddit_clean.txt#5 — "Off Campus Housing"
+     Reply by LexLuther48 to Slow_Relationship170: It’s a glorified 1-2ft deep pool. While it’s renovated, being on fig is not fun when you have a roster waking you up at 4am and police/fire trucks keeping you up till 2am. Most people I know hated gateway, and one of my friends gave up living there after a few months and started crashing my place.
+     
+     Comment by bobthe1234567: out of hub, icon, and gatewa…
+
+==========================================================================================
+Q3: When comparing Tuscany and Icon, which apartment complex is more expensive?
+Expected: Icon Plaza is generally more expensive because it offers true private single-bedroom units.
+------------------------------------------------------------------------------------------
+
+  [refusal: no]
+
+  --- System answer ---
+  According to the documents, Icon is mentioned as "really expensive" [3], while Tuscany is described as "not that expensive" [3]. Therefore, Icon is more expensive than Tuscany.
+  
+  References:
+  [3] source_3_reddit_clean.txt#2
+
+  --- Retrieved chunks (k=5) ---
+
+  #1  distance=0.350  source_2_reddit_clean.txt#7 — "Does anyone live in an off campus housing that they actually like"
+     Reply by Ok-Reaction-6748 to Mindless-Bit-5666: Nice buildings, clean, quick response times….thats at CBM, they got me and my roommates right Fairly cost efficient, rooms are nice and clean and modern…. 2k a month sounds insane, CBM is more affordable I think
+     
+     Comment by bobthe1234567: just live north of campus before adams
+     
+     Comment by [deleted]: Does Tuscany Apartments count?
+     
+     Comment by Seaworth…
+
+  #2  distance=0.411  source_4_reddit_clean.txt#4 — "Best off-campus housing options for International/Transfer students!"
+     Reply by owochase to Slow_Relationship170: Personally I would say north like gateway or hub on fig (not Los Angeles coliseum hub) is better. Closer to the village, most bars, most people, etc. That area by the Tuscany apartments is nice though, just be prepared to be making that walk to the village and up fig quite often (it’s rly not that bad I’m just lazy lol). That being said, if you’re someone…
+
+  #3  distance=0.421  source_3_reddit_clean.txt#2 — "Off Campus Housing"
+     Comment by Slow_Relationship170: Hey, its also worth looking at Tuscany and the Standard If you want more options (: The Standard is pretty cheap in comparison to the others because it's Brand new opening this Fall, and Tuscany is also not that expensive. Both are right next to the Hub Coliseum on Fig (left and right of it). I've heard Icon is good but it's really expensive and Management can suck…
+
+  #4  distance=0.489  source_3_reddit_clean.txt#0 — "Off Campus Housing"
+     Thread Title: Off Campus Housing
+     
+     Original Post by Optimal-Yak-8975: hi everyone, i’m looking into my options for off campus housing as it is not guaranteed for transfer students. Currently i am eyeing The Hub LA Coliseum and Hub LA Figueroa, Icon Plaza and Gateway(even though it’s super expensive). I am not too interested in The Lorenzo bc it’s further away from Campus to walk. I know that if i r…
+
+  #5  distance=0.493  source_2_reddit_clean.txt#14 — "Does anyone live in an off campus housing that they actually like"
+     Comment by alashia_: $1499– Private Room & Private In room Bathroom in 3x3 at The Lorenzo (Aug 2026–July 2027 Lease) This is for ONE bed in a private room within a 3 Bed / 3 Bath apartment at The Lorenzo. Rent is just $1499/month + $ 90 utilities — extremely affordable for everything included. Fully furnished apartment, private bathroom access, modern kitchen, in-unit laundry, and a spacious livin…
+
+==========================================================================================
+summary: 1 answered / 1 refusals

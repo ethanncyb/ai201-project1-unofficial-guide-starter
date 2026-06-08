@@ -1,0 +1,60 @@
+Running 2 eval query/queries at top-k=5
+
+==========================================================================================
+Q2: Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night?
+Expected: 30th St, 29th St, Ellendale Place, Orchard Ave, and USC Village.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.354  source_10_reddit_clean.txt#27 — "Honestly, what is the area around USC like for a single female?"
+     Comment by Gatodeluna: It’s infamously not a safe area in general. If you insist on living in the neighborhood very close to campus, you very likely will not feel safe. Yes, people live there and if they scuttle and scurry they can get by, but ‘living’, not so much. There are muggings, SAs and murders. Every day, all day? No - but often enough that the area is well known for it.
+     
+     Comment by [delet…
+
+  #2  distance=0.356  source_6_reddit_clean.txt#1 — "OFF CAMPUS HOUSING"
+     Reply by No-Comfortable-9520 to tiny-rabbit: can you explain why?
+     
+     Reply by Total_Opinion9205 to No-Comfortable-9520: for south of expo, high crime (lots of MS13 activity), no patrolling by police or usc security, few streetlights on at night, lots of break ins. i used to feel the same about west of vermont but found that if you stay on 36th or 37th place/streets , they are safe all the way to S W…
+
+  #3  distance=0.359  source_10_reddit_clean.txt#13 — "Honestly, what is the area around USC like for a single female?"
+     Reply by Zestyclose-Height-36 to Independent_Owl_4292: if you commute, buy an on campus parking pass, do not try to find street parking.
+     
+     Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night. The school has private security that patrols this neighborhood, and there is a lot of activity at …
+
+  #4  distance=0.395  source_10_reddit_clean.txt#24 — "Honestly, what is the area around USC like for a single female?"
+     people to wait with you for your ride. You'll get used to it quickly, it's just city living, it's not an exceptionally bad area or anything. And in the few blocks directly around campus there are extra law enforcement patrols, it's called the "USC bubble" for a reason.
+
+  #5  distance=0.407  source_10_reddit_clean.txt#28 — "Honestly, what is the area around USC like for a single female?"
+     Reply by michiness to [deleted]: It’s also super block by block. Some blocks are totally fine, some are pretty sketchy. I live a couple miles away in Leimert Park, and sometimes I’ll run down to USC. Campus/Expo Park generally are safe, there are definitely streets I avoid. A lot of it is “I’m fine alone during the day but wouldn’t walk around alone at night” as a small white chick.
+
+  verdict: [good]  best distance = 0.354
+
+==========================================================================================
+Q7: Which four streets form the perimeter of the USC bubble, an area noted for being highly patrolled by private security?
+Expected: The area is bounded by Expo, Fig (Figueroa), Adams, and Vermont.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.420  source_10_reddit_clean.txt#24 — "Honestly, what is the area around USC like for a single female?"
+     people to wait with you for your ride. You'll get used to it quickly, it's just city living, it's not an exceptionally bad area or anything. And in the few blocks directly around campus there are extra law enforcement patrols, it's called the "USC bubble" for a reason.
+
+  #2  distance=0.456  source_6_reddit_clean.txt#1 — "OFF CAMPUS HOUSING"
+     Reply by No-Comfortable-9520 to tiny-rabbit: can you explain why?
+     
+     Reply by Total_Opinion9205 to No-Comfortable-9520: for south of expo, high crime (lots of MS13 activity), no patrolling by police or usc security, few streetlights on at night, lots of break ins. i used to feel the same about west of vermont but found that if you stay on 36th or 37th place/streets , they are safe all the way to S W…
+
+  #3  distance=0.460  source_10_reddit_clean.txt#13 — "Honestly, what is the area around USC like for a single female?"
+     Reply by Zestyclose-Height-36 to Independent_Owl_4292: if you commute, buy an on campus parking pass, do not try to find street parking.
+     
+     Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night. The school has private security that patrols this neighborhood, and there is a lot of activity at …
+
+  #4  distance=0.539  source_10_reddit_clean.txt#28 — "Honestly, what is the area around USC like for a single female?"
+     Reply by michiness to [deleted]: It’s also super block by block. Some blocks are totally fine, some are pretty sketchy. I live a couple miles away in Leimert Park, and sometimes I’ll run down to USC. Campus/Expo Park generally are safe, there are definitely streets I avoid. A lot of it is “I’m fine alone during the day but wouldn’t walk around alone at night” as a small white chick.
+
+  #5  distance=0.539  source_10_reddit_clean.txt#27 — "Honestly, what is the area around USC like for a single female?"
+     Comment by Gatodeluna: It’s infamously not a safe area in general. If you insist on living in the neighborhood very close to campus, you very likely will not feel safe. Yes, people live there and if they scuttle and scurry they can get by, but ‘living’, not so much. There are muggings, SAs and murders. Every day, all day? No - but often enough that the area is well known for it.
+     
+     Comment by [delet…
+
+  verdict: [good]  best distance = 0.420
+
+==========================================================================================
+summary: 2 good / 0 weak / 0 bad

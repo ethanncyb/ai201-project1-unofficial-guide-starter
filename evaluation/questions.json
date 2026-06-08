@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "query": "How are the reliability and wait times of the shuttles at The Residences at Lorenzo?",
+    "expected": "The shuttles are rarely on time and are often crowded to maximum capacity."
+  },
+  {
+    "id": 2,
+    "query": "Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night?",
+    "expected": "30th St, 29th St, Ellendale Place, Orchard Ave, and USC Village."
+  },
+  {
+    "id": 3,
+    "query": "When comparing Tuscany and Icon, which apartment complex is more expensive?",
+    "expected": "Icon Plaza is generally more expensive because it offers true private single-bedroom units."
+  },
+  {
+    "id": 4,
+    "query": "Which off-campus housing companies or apartment buildings offer furnished rooms or lenient guarantor requirements for international students?",
+    "expected": "International students frequently choose housing companies such as Tripalink, Stuho, and Orion Housing, as well as large apartment complexes like The Lorenzo and University Gateway."
+  },
+  {
+    "id": 5,
+    "query": "What are the most common daily annoyances regarding the elevators and street noise at University Gateway?",
+    "expected": "Tenants frequently complain that the eight available elevators take too long to arrive during peak morning hours and other busy times. Units facing the main roads also experience high levels of city and traffic noise."
+  },
+  {
+    "id": 6,
+    "query": "Why do students complain about using their cell phones inside the University Gateway apartments?",
+    "expected": "The physical design of the building blocks cell data, resulting in no signal or no bars, which forces residents to leave the building to do anything requiring the internet."
+  },
+  {
+    "id": 7,
+    "query": "Which four streets form the perimeter of the USC bubble, an area noted for being highly patrolled by private security?",
+    "expected": "The area is bounded by Expo, Fig (Figueroa), Adams, and Vermont."
+  }
+]
