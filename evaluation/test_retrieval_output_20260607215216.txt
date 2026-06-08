@@ -1,0 +1,210 @@
+Running 7 eval query/queries at top-k=5
+
+==========================================================================================
+Q1: How are the reliability and wait times of the shuttles at The Residences at Lorenzo?
+Expected: The shuttles are rarely on time and are often crowded to maximum capacity.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.467  source_8_yelp_clean.txt#12 — "The Residences at Lorenzo"
+     Reply by J T. (Business Owner) to Butian X. (Jan 24, 2026): Hi Butian, Thank you again for taking the time to share your detailed feedback. While we have already responded to your review on Google, we also wanted to acknowledge your comments here as well. We’re sorry to hear that your experience at The Lorenzo has not met expectations, and we understand how frustrating ongoing concerns such as ele…
+
+  #2  distance=0.486  source_3_reddit_clean.txt#3 — "Off Campus Housing"
+     Reply by Optimal-Yak-8975 to Slow_Relationship170: ohhh yeah the standard looks real nice 🙃 let’s keep in touch lol
+     
+     Comment by LexLuther48: Would avoid Gateway. It’s on Fig (lots of police/fire truck activity), the amenities are bad (advertises a pool but it’s literally just a shallow splash zone), and infrastructure of the rooms are not great for the price. Lorenzo has a free shuttle that will b…
+
+  #3  distance=0.487  source_8_yelp_clean.txt#7 — "The Residences at Lorenzo"
+     Reply by Karla A. (Business Owner) to AZ A. (May 19, 2025): Hi AZ, Thank you for taking the time to share your detailed feedback. We’re sorry to hear that your experience at The Residences at Lorenzo fell short of expectations. We understand your concerns and sincerely regret the frustration you've experienced with package delivery, gym conditions, elevator access, hot water availability, and unit…
+
+  #4  distance=0.498  source_2_reddit_clean.txt#14 — "Does anyone live in an off campus housing that they actually like"
+     Comment by alashia_: $1499– Private Room & Private In room Bathroom in 3x3 at The Lorenzo (Aug 2026–July 2027 Lease) This is for ONE bed in a private room within a 3 Bed / 3 Bath apartment at The Lorenzo. Rent is just $1499/month + $ 90 utilities — extremely affordable for everything included. Fully furnished apartment, private bathroom access, modern kitchen, in-unit laundry, and a spacious livin…
+
+  #5  distance=0.513  source_3_reddit_clean.txt#5 — "Off Campus Housing"
+     Reply by LexLuther48 to Slow_Relationship170: It’s a glorified 1-2ft deep pool. While it’s renovated, being on fig is not fun when you have a roster waking you up at 4am and police/fire trucks keeping you up till 2am. Most people I know hated gateway, and one of my friends gave up living there after a few months and started crashing my place.
+     
+     Comment by bobthe1234567: out of hub, icon, and gatewa…
+
+  verdict: [good]  best distance = 0.467
+
+==========================================================================================
+Q2: Which specific streets or patrol boundaries are considered the safest for walking around the USC campus at night?
+Expected: 30th St, 29th St, Ellendale Place, Orchard Ave, and USC Village.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.354  source_10_reddit_clean.txt#27 — "Honestly, what is the area around USC like for a single female?"
+     Comment by Gatodeluna: It’s infamously not a safe area in general. If you insist on living in the neighborhood very close to campus, you very likely will not feel safe. Yes, people live there and if they scuttle and scurry they can get by, but ‘living’, not so much. There are muggings, SAs and murders. Every day, all day? No - but often enough that the area is well known for it.
+     
+     Comment by [delet…
+
+  #2  distance=0.356  source_6_reddit_clean.txt#1 — "OFF CAMPUS HOUSING"
+     Reply by No-Comfortable-9520 to tiny-rabbit: can you explain why?
+     
+     Reply by Total_Opinion9205 to No-Comfortable-9520: for south of expo, high crime (lots of MS13 activity), no patrolling by police or usc security, few streetlights on at night, lots of break ins. i used to feel the same about west of vermont but found that if you stay on 36th or 37th place/streets , they are safe all the way to S W…
+
+  #3  distance=0.359  source_10_reddit_clean.txt#13 — "Honestly, what is the area around USC like for a single female?"
+     Reply by Zestyclose-Height-36 to Independent_Owl_4292: if you commute, buy an on campus parking pass, do not try to find street parking.
+     
+     Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night. The school has private security that patrols this neighborhood, and there is a lot of activity at …
+
+  #4  distance=0.395  source_10_reddit_clean.txt#24 — "Honestly, what is the area around USC like for a single female?"
+     people to wait with you for your ride. You'll get used to it quickly, it's just city living, it's not an exceptionally bad area or anything. And in the few blocks directly around campus there are extra law enforcement patrols, it's called the "USC bubble" for a reason.
+
+  #5  distance=0.407  source_10_reddit_clean.txt#28 — "Honestly, what is the area around USC like for a single female?"
+     Reply by michiness to [deleted]: It’s also super block by block. Some blocks are totally fine, some are pretty sketchy. I live a couple miles away in Leimert Park, and sometimes I’ll run down to USC. Campus/Expo Park generally are safe, there are definitely streets I avoid. A lot of it is “I’m fine alone during the day but wouldn’t walk around alone at night” as a small white chick.
+
+  verdict: [good]  best distance = 0.354
+
+==========================================================================================
+Q3: When comparing Tuscany and Icon, which apartment complex is more expensive?
+Expected: Icon Plaza is generally more expensive because it offers true private single-bedroom units.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.350  source_2_reddit_clean.txt#7 — "Does anyone live in an off campus housing that they actually like"
+     Reply by Ok-Reaction-6748 to Mindless-Bit-5666: Nice buildings, clean, quick response times….thats at CBM, they got me and my roommates right Fairly cost efficient, rooms are nice and clean and modern…. 2k a month sounds insane, CBM is more affordable I think
+     
+     Comment by bobthe1234567: just live north of campus before adams
+     
+     Comment by [deleted]: Does Tuscany Apartments count?
+     
+     Comment by Seaworth…
+
+  #2  distance=0.411  source_4_reddit_clean.txt#4 — "Best off-campus housing options for International/Transfer students!"
+     Reply by owochase to Slow_Relationship170: Personally I would say north like gateway or hub on fig (not Los Angeles coliseum hub) is better. Closer to the village, most bars, most people, etc. That area by the Tuscany apartments is nice though, just be prepared to be making that walk to the village and up fig quite often (it’s rly not that bad I’m just lazy lol). That being said, if you’re someone…
+
+  #3  distance=0.421  source_3_reddit_clean.txt#2 — "Off Campus Housing"
+     Comment by Slow_Relationship170: Hey, its also worth looking at Tuscany and the Standard If you want more options (: The Standard is pretty cheap in comparison to the others because it's Brand new opening this Fall, and Tuscany is also not that expensive. Both are right next to the Hub Coliseum on Fig (left and right of it). I've heard Icon is good but it's really expensive and Management can suck…
+
+  #4  distance=0.489  source_3_reddit_clean.txt#0 — "Off Campus Housing"
+     Thread Title: Off Campus Housing
+     
+     Original Post by Optimal-Yak-8975: hi everyone, i’m looking into my options for off campus housing as it is not guaranteed for transfer students. Currently i am eyeing The Hub LA Coliseum and Hub LA Figueroa, Icon Plaza and Gateway(even though it’s super expensive). I am not too interested in The Lorenzo bc it’s further away from Campus to walk. I know that if i r…
+
+  #5  distance=0.493  source_2_reddit_clean.txt#14 — "Does anyone live in an off campus housing that they actually like"
+     Comment by alashia_: $1499– Private Room & Private In room Bathroom in 3x3 at The Lorenzo (Aug 2026–July 2027 Lease) This is for ONE bed in a private room within a 3 Bed / 3 Bath apartment at The Lorenzo. Rent is just $1499/month + $ 90 utilities — extremely affordable for everything included. Fully furnished apartment, private bathroom access, modern kitchen, in-unit laundry, and a spacious livin…
+
+  verdict: [good]  best distance = 0.350
+
+==========================================================================================
+Q4: Which off-campus housing companies or apartment buildings offer furnished rooms or lenient guarantor requirements for international students?
+Expected: International students frequently choose housing companies such as Tripalink, Stuho, and Orion Housing, as well as large apartment complexes like The Lorenzo and University Gateway.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.337  source_4_reddit_clean.txt#0 — "Best off-campus housing options for International/Transfer students!"
+     Thread Title: Best off-campus housing options for International/Transfer students!
+     
+     Original Post by Slow_Relationship170: Heyyy USC sub, I'm an incoming international sophomore transfer from Portugal! (: I know someone else already posted about this but it wasnt really helpful. Does anyone have any Insights in what the best off-campus housing options are currently? The only post about this from 5…
+
+  #2  distance=0.377  source_3_reddit_clean.txt#7 — "Off Campus Housing"
+     Comment by Content_Award_3202: same boat here ..I am looking for off-campus housing as a transfer student. Trying to balance close to campus for safety and convenience reasons and have considered Gateway since it’s the most convenient, but I really liked. the Hub for the way it’s managed, etc. But I’m not thrilled about that location as much …maybe it’s just because i had a drugged out guy with a …
+
+  #3  distance=0.378  source_2_reddit_clean.txt#8 — "Does anyone live in an off campus housing that they actually like"
+     Comment by brendandank: I’m with mosaic student housing and I’m absolutely loving it so far! The management is swift in addressing my maintenance requests and rent is $900/mo for me. I’m in a five bedroom house less than a mile away from campus. The other rooms are going for $700ish/mo.
+     
+     Reply by SadEmotion8310 to brendandank: my thing is they're unfurnished for the most part, do you know of any h…
+
+  #4  distance=0.404  source_5_reddit_clean.txt#16 — "best off campus housing options"
+     Comment by yun2yun2: Hi! I’m subleasing my master bedroom near USC (5-min walk to USC (free Lyft zone) ) since I’m graduating. Can fit at least 2 people, $1800/month with parking. Late April–July 31. DM me!
+     
+     Comment by zhcrossing: has anyone had experience with mosaic student housing?
+     
+     Comment by blueberry1237: Hi! I help manage a few smaller apartment buildings a short drive from campus and we cu…
+
+  #5  distance=0.407  source_5_reddit_clean.txt#0 — "best off campus housing options"
+     Thread Title: best off campus housing options
+     
+     Original Post by FierceDeity357: so its looking like i wont get housing for next semester (spring admit student). what are the best options i have for off campus housing?
+     
+     Comment by RamenisGuud: I’m looking to sublease my room for the spring! It’s in a 2 bed 1 bath about a 5 min walk away from campus. Girls only though since my roommate is a girl. I’…
+
+  verdict: [good]  best distance = 0.337
+
+==========================================================================================
+Q5: What are the most common daily annoyances regarding the elevators and street noise at University Gateway?
+Expected: Tenants frequently complain that the eight available elevators take too long to arrive during peak morning hours and other busy times. Units facing the main roads also experience high levels of city and traffic noise.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.461  source_9_yelp_clean.txt#8 — "University Gateway"
+     Review by John L. (2 stars, Dec 15, 2024): This is my second year at Gateway. Last year, I didn't mind living here. However, this year has been a total switch up. For some reason, the lobby will randomly smell like eggs. It comes in waves, and it's random and unpredictable. Additionally, the elevators have been broken for damn near a month. The two elevators I mainly use have been out of service f…
+
+  #2  distance=0.479  source_8_yelp_clean.txt#11 — "The Residences at Lorenzo"
+     2026, the alarm blasted from 11:30 PM past midnight with no fire department presence. This is a safety hazard and a nuisance violation. Broken Elevators: The elevators are constantly out of service, a failure to maintain the building's essential facilities. 3. Management Strategy: When you complain about these serious habitability issues, they ignore you or send generic replies. They know internat…
+
+  #3  distance=0.516  source_3_reddit_clean.txt#1 — "Off Campus Housing"
+     Comment by SeaworthinessQuiet73: My son lived at the Hub Coliseum his junior and senior years and really liked it. He was in the business school so it was a 10 minute walk and his roommate was in Dornsife. Plenty of food options and probably safer than the other end of Figueroa since there were people and police in the area during events. Building was well managed and he had no complaints in the 2…
+
+  #4  distance=0.528  source_8_yelp_clean.txt#12 — "The Residences at Lorenzo"
+     Reply by J T. (Business Owner) to Butian X. (Jan 24, 2026): Hi Butian, Thank you again for taking the time to share your detailed feedback. While we have already responded to your review on Google, we also wanted to acknowledge your comments here as well. We’re sorry to hear that your experience at The Lorenzo has not met expectations, and we understand how frustrating ongoing concerns such as ele…
+
+  #5  distance=0.559  source_9_yelp_clean.txt#6 — "University Gateway"
+     Review by Hi I. (2 stars, Nov 11, 2025): Lived here for a while and really do not recommend. CONS: 1. The washing machines barely work. When you drag ur laundry bag all the way to another floor, chances are they still don't work lol. 2. The signal is really bad sometimes. I'm not talking about bad wifi, I'm talking about no bars no signal at all. 3. I did not feel safe coming home at night. The ap…
+
+  verdict: [good]  best distance = 0.461
+
+==========================================================================================
+Q6: Why do students complain about using their cell phones inside the University Gateway apartments?
+Expected: The physical design of the building blocks cell data, resulting in no signal or no bars, which forces residents to leave the building to do anything requiring the internet.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.440  source_9_yelp_clean.txt#7 — "University Gateway"
+     Review by Spam E. (1 stars, Jan 14, 2026): Genuinely unusable wifi since I got back from break, and the design of the building doesn't let cell data through. To do anything that requires internet I have to leave the building. Inexcusable for a building which wants to serve students
+
+  #2  distance=0.471  source_10_reddit_clean.txt#19 — "Honestly, what is the area around USC like for a single female?"
+     the outbreak (2020). I think that’s due partly to things like more streetlights regularly being out (due to wire thefts AS WELL AS insufficient numbers of students taking part in civic life and actually filing complaints with the city); as well as that weird angry aggression that so many people seem to have developed since the first “lockdown”. Also, this can’t be overstated: A lot of the accident…
+
+  #3  distance=0.480  source_10_reddit_clean.txt#6 — "Honestly, what is the area around USC like for a single female?"
+     Reply by nasw500 to mumpie: Lights can’t be stressed enough. It fair bloweth my mind, how many students ride unlit bikes, while wearing dark clothes… and while oft-staring at their ‘phones. 😵‍💫😵‍💫😵‍💫
+     
+     Reply by earthtopaige1 to LAD17Decoy: I literally get email alerts about once a week about a USC student getting groped, what are you talking about
+     
+     Reply by Seri0usbusiness to LAD17Decoy: 3/3 of my …
+
+  #4  distance=0.500  source_10_reddit_clean.txt#40 — "Honestly, what is the area around USC like for a single female?"
+     Reply by Independent_Owl_4292 to [deleted]: No public transit because of safety issues? I heard that lots of students commute from Palms; when I visited I started driving that way to check it out and not only did it take like forty minutes but the areas I drove through looked pretty bad. I thought about commuting from somewhere near Los Feliz too, but it took me an hour to drive there from campus!…
+
+  #5  distance=0.527  source_9_yelp_clean.txt#0 — "University Gateway"
+     Business: University Gateway
+     Location: 3335 South Figueroa St, Los Angeles, CA 90007
+     
+     --- Q&A SECTION ---
+     
+     Question: Is housing only available for USC students?
+     Answer by Property Manager, Business Owner: Hello Linh,
+     
+     University Gateway apartments are open to anybody who meets our rental qualifying guidelines.
+     Stop by the property… more
+     
+     Question: How much is a shared room?
+     Answer by Property Mana…
+
+  verdict: [good]  best distance = 0.440
+
+==========================================================================================
+Q7: Which four streets form the perimeter of the USC bubble, an area noted for being highly patrolled by private security?
+Expected: The area is bounded by Expo, Fig (Figueroa), Adams, and Vermont.
+------------------------------------------------------------------------------------------
+
+  #1  distance=0.420  source_10_reddit_clean.txt#24 — "Honestly, what is the area around USC like for a single female?"
+     people to wait with you for your ride. You'll get used to it quickly, it's just city living, it's not an exceptionally bad area or anything. And in the few blocks directly around campus there are extra law enforcement patrols, it's called the "USC bubble" for a reason.
+
+  #2  distance=0.456  source_6_reddit_clean.txt#1 — "OFF CAMPUS HOUSING"
+     Reply by No-Comfortable-9520 to tiny-rabbit: can you explain why?
+     
+     Reply by Total_Opinion9205 to No-Comfortable-9520: for south of expo, high crime (lots of MS13 activity), no patrolling by police or usc security, few streetlights on at night, lots of break ins. i used to feel the same about west of vermont but found that if you stay on 36th or 37th place/streets , they are safe all the way to S W…
+
+  #3  distance=0.460  source_10_reddit_clean.txt#13 — "Honestly, what is the area around USC like for a single female?"
+     Reply by Zestyclose-Height-36 to Independent_Owl_4292: if you commute, buy an on campus parking pass, do not try to find street parking.
+     
+     Comment by Moldy_Slice_of_Bread: The area around USC, especially the area bounded by Expo-Fig-Adams-Vermont, is a bubble. Very safe by LA standards, day and night. The school has private security that patrols this neighborhood, and there is a lot of activity at …
+
+  #4  distance=0.539  source_10_reddit_clean.txt#28 — "Honestly, what is the area around USC like for a single female?"
+     Reply by michiness to [deleted]: It’s also super block by block. Some blocks are totally fine, some are pretty sketchy. I live a couple miles away in Leimert Park, and sometimes I’ll run down to USC. Campus/Expo Park generally are safe, there are definitely streets I avoid. A lot of it is “I’m fine alone during the day but wouldn’t walk around alone at night” as a small white chick.
+
+  #5  distance=0.539  source_10_reddit_clean.txt#27 — "Honestly, what is the area around USC like for a single female?"
+     Comment by Gatodeluna: It’s infamously not a safe area in general. If you insist on living in the neighborhood very close to campus, you very likely will not feel safe. Yes, people live there and if they scuttle and scurry they can get by, but ‘living’, not so much. There are muggings, SAs and murders. Every day, all day? No - but often enough that the area is well known for it.
+     
+     Comment by [delet…
+
+  verdict: [good]  best distance = 0.420
+
+==========================================================================================
+summary: 7 good / 0 weak / 0 bad
